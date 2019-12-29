@@ -1,0 +1,9 @@
+CREATE TABLE IF NOT EXISTS NEWS (
+	title TEXT NOT NULL,
+	content TEXT NOT NULL,
+	tick TEXT,
+	site TEXT NOT NULL,
+	data TEXT NOT NULL,
+	PRIMARY KEY  (site, data)
+);
+
