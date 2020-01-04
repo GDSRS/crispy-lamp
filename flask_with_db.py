@@ -1,43 +1,39 @@
 import sqlite3
 from flask import g, Flask, request # g faz parte do application context
 import json
+from classes import db, News, populate_db
+from datetime import datetime
 
 app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db.init_app(app)
 
 DATABASE = './database.db'
 
 
-def make_dicts(cursor, row):
-    return dict((cursor.description[idx][0], value) for idx, value in enumerate(row))
-
-
-def get_db():
-    db = getattr(g, '_database',None)
-    if db is None:
-        db = g._database = sqlite3.connect(DATABASE)
-        db.row_factory = make_dicts
-    return db
-
-@app.route('/',methods=['POST'])
-@app.route('/<news_id>/',methods=['GET'])
-def post_or_get(news_id=None):
-    if news_id is not None:
-        print('news_id is not None',news_id)
-        query = 'SELECT rowid, * FROM NEWS WHERE rowid = ?'
-        _id, title, content, tick, site, data = query_db(query,[news_id],one=True)
-        return {'id':_id, 'title': title, 'content': content,'tick': tick, 'site': site, 'data': data}
+@app.route('/<tick>/',methods=['GET'])
+def get_news_by_tick(tick=None):
+    if tick is not None:
+        news = News.query.filter_by(tick=tick).all()
+        json_result = [n.as_dict() for n in news ]
+        print(json_result)
+        return { 'results': json_result }
     else:
-        return {'ERRO': 'id deve ser expecificado'}
+        return {'ERRO': 'tick deve ser especificado'}
 
 @app.route('/',methods=['POST','GET'])
 def post_or_get_news():
     if request.method == 'POST':
-        query = 'INSERT INTO NEWS (title, content, site, data) VALUES(?,?,?,?)'
-        tuple_element = (request.json['title'],request.json['content'],request.json['site'],request.json['data'])
-        return str(query_db(query,tuple_element))
+        news = News(title=request.json['title'],content=request.json['content'],site=request.json['site'],\
+        date=datetime.strptime(request.json['date'],'%Y-%m-%d %H:%M:%S.%f'),tick=request.json['tick'])
+        db.session.add(news)
+        db.session.commit()
+        return news.as_dict()
     elif request.method == 'GET':
-        query ='SELECT rowid, * FROM NEWS'
-        return {'results': query_db(query)}
+        news = News.query.all()
+        json_result = [n.as_dict() for n in news]
+        return {'results': json_result}
     else:
         print('request method was', request.method)
         raise Exception
@@ -48,20 +44,13 @@ def close_connection(exception):
     if db is not None:
         db.close()
 
-def query_db(query, args=(),one=False):
-    db = get_db()
-    cur = db.execute(query,args)
-    db.commit()
-    rv = cur.fetchall()
-    cur.close()
-    return (rv[0] if rv else None) if one else rv
-
 def init_db():
     with app.app_context():
-        db = get_db()
-        with app.open_resource('schema.sql', mode='r') as f:
-            db.cursor().executescript(f.read())
-        db.commit()
+        db.create_all()
+        if len(News.query.all()) == 0:
+            populate_db()
+        else:
+            print("Não precisou popular")
 
 init_db()
 app.run()
