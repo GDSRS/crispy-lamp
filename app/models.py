@@ -12,7 +12,7 @@ class News(db.Model):
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns }
 
-def populate_db():
+def populate_db():#método de teste
     db.session.add(News(title='asdf',content='asdf',tick='MGLU3',site='https://site.com',date=datetime.datetime.today()))
     db.session.add(News(title='asdf',content='asdf',tick='MGLU3',site='https://site.com',date=datetime.datetime.today() + datetime.timedelta(days=1)))
     db.session.add(News(title='asdf',content='asdf',tick='MGLU3',site='https://site.com',date=datetime.datetime.today() + datetime.timedelta(days=2)))

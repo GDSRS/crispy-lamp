@@ -1,15 +1,13 @@
 import sqlite3
-from flask import g, Flask, request # g faz parte do application context
+from flask import g, Flask, request, Response # g faz parte do application context
 import json
-from classes import db, News, populate_db
+from models import db, News, populate_db
 from datetime import datetime
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
-
-DATABASE = './database.db'
 
 
 @app.route('/<tick>/',methods=['GET'])
@@ -26,10 +24,11 @@ def get_news_by_tick(tick=None):
 def post_or_get_news():
     if request.method == 'POST':
         news = News(title=request.json['title'],content=request.json['content'],site=request.json['site'],\
-        date=datetime.strptime(request.json['date'],'%Y-%m-%d %H:%M:%S.%f'),tick=request.json['tick'])
+        date=datetime.strptime(request.json['date'],'%Y-%m-%d %H:%M'),tick=request.json['tick'])
         db.session.add(news)
         db.session.commit()
-        return news.as_dict()
+        #TODO: Converter para json
+        return news.as_dict(), 201
     elif request.method == 'GET':
         news = News.query.all()
         json_result = [n.as_dict() for n in news]
@@ -44,14 +43,18 @@ def close_connection(exception):
     if db is not None:
         db.close()
 
-def init_db():
+def pop_db():
     with app.app_context():
-        db.create_all()
+        initialize_db()
         if len(News.query.all()) == 0:
             populate_db()
         else:
             print("Não precisou popular")
 
-init_db()
-app.run()
+def initialize_db():
+    db.create_all()
+
+if __name__ == '__main__':
+	pop_db()
+	app.run()
 
