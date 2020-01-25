@@ -1,7 +1,7 @@
 import sqlite3
 from flask import g, Flask, request, Response # g faz parte do application context
 import json
-from models import db, News, populate_db
+from .models import db, News, populate_db
 from datetime import datetime
 
 app = Flask(__name__)

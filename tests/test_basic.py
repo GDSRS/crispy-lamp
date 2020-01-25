@@ -3,7 +3,7 @@ import tempfile
 import pytest
 from pathlib import Path
 import sys
-from crispy_lamp.app import app, models
+from app import app, models
 
 @pytest.fixture
 def client():
