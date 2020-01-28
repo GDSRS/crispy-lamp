@@ -14,7 +14,7 @@ db.init_app(app)
 def get_news_by_tick(tick=None):
     if tick is not None:
         news = News.query.filter_by(tick=tick).all()
-        json_result = [n.as_dict() for n in news ]
+        json_result = [n.to_json() for n in news ]
         print(json_result)
         return { 'results': json_result }
     else:
@@ -24,14 +24,13 @@ def get_news_by_tick(tick=None):
 def post_or_get_news():
     if request.method == 'POST':
         news = News(title=request.json['title'],content=request.json['content'],site=request.json['site'],\
-        date=datetime.strptime(request.json['date'],'%Y-%m-%d %H:%M'),tick=request.json['tick'])
+        date=datetime.strptime(request.json['date'],'%d-%m-%Y %H:%M'),tick=request.json['tick'])
         db.session.add(news)
         db.session.commit()
-        #TODO: Converter para json
-        return news.as_dict(), 201
+        return news.to_json(), 201
     elif request.method == 'GET':
         news = News.query.all()
-        json_result = [n.as_dict() for n in news]
+        json_result = [n.to_json() for n in news]
         return {'results': json_result}
     else:
         print('request method was', request.method)
