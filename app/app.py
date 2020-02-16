@@ -1,6 +1,5 @@
 import sqlite3
-from flask import g, Flask, request, Response # g faz parte do application context
-import json
+from flask import g, Flask, request, Response, make_response # g faz parte do application context
 from .models import db, News, populate_db
 from datetime import datetime
 
@@ -9,14 +8,12 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
 
-
-@app.route('/<tick>/',methods=['GET'])
+@app.route('/<string:tick>',methods=['GET'])
 def get_news_by_tick(tick=None):
     if tick is not None:
         news = News.query.filter_by(tick=tick).all()
         json_result = [n.to_json() for n in news ]
-        print(json_result)
-        return { 'results': json_result }
+        return make_response({'results': json_result}, 200, {'Content-Type':'application/json'})
     else:
         return {'ERRO': 'tick deve ser especificado'}
 
@@ -27,11 +24,11 @@ def post_or_get_news():
         date=datetime.strptime(request.json['date'],'%d-%m-%Y %H:%M'),tick=request.json['tick'])
         db.session.add(news)
         db.session.commit()
-        return news.to_json(), 201
+        return make_response(news.to_json(), 201, {'Content-Type':'application/json'})
     elif request.method == 'GET':
         news = News.query.all()
         json_result = [n.to_json() for n in news]
-        return {'results': json_result}
+        return make_response({'results': json_result}, 200, {'Content-Type':'application/json'})
     else:
         print('request method was', request.method)
         raise Exception

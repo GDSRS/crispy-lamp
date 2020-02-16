@@ -1,7 +1,7 @@
 import os
 import tempfile
 import pytest
-from app import app, models
+from crispy_lamp.app import app, models
 from sqlite3 import IntegrityError
 
 
@@ -38,11 +38,11 @@ def test_post(client):
 
 def test_get_one_news(client):
     client.post('/',json=json_object)
-    response = client.get('/')
+    response = client.get('/'+json_object['tick'])
     assert len(response.json['results']) == 1
     assert response.json['results'][0] == json_object
 
-def test_show_raise(client):
+def test_save_same_object(client):
     with pytest.raises(Exception) as e:
         client.post('/',json=json_object)
         client.post('/',json=json_object)
