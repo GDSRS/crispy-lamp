@@ -1,7 +1,7 @@
 import os
 import tempfile
 import pytest
-from crispy_lamp.app import app, models
+from app import app, models
 from sqlite3 import IntegrityError
 
 
