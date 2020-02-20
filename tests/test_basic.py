@@ -42,7 +42,7 @@ def test_get_one_news(client):
     assert len(response.json['results']) == 1
     assert response.json['results'][0] == json_object
 
-def test_save_same_object(client):
+def test_erro_save_same_object(client):
     with pytest.raises(Exception) as e:
         client.post('/',json=json_object)
         client.post('/',json=json_object)
