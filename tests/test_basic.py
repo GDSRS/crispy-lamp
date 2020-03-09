@@ -10,7 +10,9 @@ json_object = dict(
         content='Conteudo notícia',
         site='www.xsd.com',
         date='23-01-2020 20:24',
-        tick='MGLU3')
+        tick='MGLU3',
+        url='url',
+        author='junin autor')
 
 @pytest.fixture(scope='function')
 def client():
@@ -47,4 +49,4 @@ def test_erro_save_same_object(client):
         client.post('/',json=json_object)
         client.post('/',json=json_object)
     assert e.typename == 'IntegrityError'
-    assert str(e.value.orig) == 'UNIQUE constraint failed: news.site, news.date'
+    assert str(e.value.orig) == 'UNIQUE constraint failed: news.url, news.site, news.date'
