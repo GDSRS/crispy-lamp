@@ -20,8 +20,9 @@ def get_news_by_tick(tick=None):
 @app.route('/',methods=['POST','GET'])
 def post_or_get_news():
     if request.method == 'POST':
-        news = News(title=request.json['title'],content=request.json['content'],site=request.json['site'],\
-        date=datetime.strptime(request.json['date'],'%d-%m-%Y %H:%M'),tick=request.json['tick'])
+        news = News(title=request.json['title'],content=request.json['content'],site=request.json['site'],
+        date=datetime.strptime(request.json['date'],'%d-%m-%Y %H:%M'),tick=request.json['tick'],
+        author=request.json['author'], url=request.json['url'])
         db.session.add(news)
         db.session.commit()
         return make_response(news.to_json(), 201, {'Content-Type':'application/json'})
@@ -42,15 +43,15 @@ def close_connection(exception):
 def pop_db():
     with app.app_context():
         initialize_db()
-        if len(News.query.all()) == 0:
-            populate_db()
-        else:
-            print("Não precisou popular")
+        # if len(News.query.all()) == 0:
+        #     # populate_db()
+        # else:
+        #     print("Não precisou popular")
 
 def initialize_db():
     db.create_all()
 
 if __name__ == '__main__':
-	pop_db()
-	app.run()
+    pop_db()
+    app.run()
 

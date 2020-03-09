@@ -133,3 +133,6 @@ dmypy.json
 
 #Virtualenv
 env/*
+
+#SQLite
+*.db
