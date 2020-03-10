@@ -14,12 +14,12 @@ class NewsscraperItem(scrapy.Item):
     pass
 
 class NoticiaLink(scrapy.Item):
-	site = scrapy.Field()
-	url = scrapy.Field()
+    site = scrapy.Field()
+    url = scrapy.Field()
 
 class Noticia(NoticiaLink):
-	title = scrapy.Field()
-	content = scrapy.Field()
-	tick = scrapy.Field()
-	date = scrapy.Field()
-	author = scrapy.Field()
+    title = scrapy.Field()
+    content = scrapy.Field()
+    tick = scrapy.Field()
+    date = scrapy.Field()
+    author = scrapy.Field()

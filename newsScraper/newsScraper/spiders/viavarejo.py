@@ -41,6 +41,9 @@ class ViavarejoSpider(scrapy.Spider):
             elif 'Advfn' == link.get('site'):
                 yield response.follow(link.get('url'), callback=self.parse_advfn,
                     cb_kwargs=dict(info=link))
+            elif 'SpaceMoney' == link.get('site'):
+                yield response.follow(link.get('url'), callback=self.parse_spacemoney,
+                    cb_kwargs=dict(info=link))
             else:
                yield link
 
@@ -140,6 +143,20 @@ class ViavarejoSpider(scrapy.Spider):
             'content': remove_tags(''.join(response.css('.post-content p').getall())),
             'date': date,
             'author': response.css('.posted-by a::text').get().strip(),
+            'url': info['url'],
+            'site': info['site'],
+            'tick': 'VVAR3'
+        }
+        yield Noticia(news_obj)
+
+    def parse_spacemoney(self, response, info):
+        date = response.css('.post-published::attr(datetime)').get()
+        date = datetime.strptime(date, '%Y-%m-%dT%H:%M:%S%z')
+        news_obj = {
+            'title': response.css('.post-title::text').get(),
+            'content': remove_tags(''.join(response.css('.single-post-content p').getall())),
+            'date': date,
+            'author': response.css('.post-author-name b::text').get(),
             'url': info['url'],
             'site': info['site'],
             'tick': 'VVAR3'
