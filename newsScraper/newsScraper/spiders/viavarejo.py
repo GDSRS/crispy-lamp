@@ -3,14 +3,20 @@ import scrapy
 import locale
 from w3lib.html import remove_tags
 from urllib.parse import unquote
-from datetime import datetime
+from datetime import datetime, timezone
 from newsScraper.items import NoticiaLink, Noticia
 
+locale.setlocale(locale.LC_TIME, 'pt_BR.utf8')
 
 class ViavarejoSpider(scrapy.Spider):
     name = 'viavarejo'
     # allowed_domains = ['https://www.google.com/search?hl=pt&biw=1366&bih=589&tbs=sbd%3A1&tbm=nws&q=VVAR3']
-    start_urls = ['https://www.google.com/search?hl=pt&biw=1366&bih=589&tbs=sbd%3A1&tbm=nws&q=VVAR3/']
+    start_urls = ['https://www.google.com/search?q=VVAR3&hl=pt&tbs=sbd:1&tbm=nws']
+
+    def __init__(self, max_num_pgs=3, **kwargs):
+        self.MAX_NUM_PAG = max_num_pgs
+        self.page_number = 0
+        super().__init__(**kwargs)
 
     def parse(self, response):
         urls = response.css(".kCrYT > a::attr(href)").getall() 
@@ -47,6 +53,13 @@ class ViavarejoSpider(scrapy.Spider):
             else:
                yield link
 
+        self.page_number+=1
+
+        next_page = response.css('.nBDE1b::attr(href)').getall()[-1]
+        if next_page is not None and self.page_number < self.MAX_NUM_PAG:
+            print('Número da pagina %i' % self.page_number, next_page)
+            yield response.follow(next_page, callback=self.parse)
+
     def remove_duplicates(self, urls: list) -> list:
         unique_urls = []
         for url in urls:
@@ -62,6 +75,7 @@ class ViavarejoSpider(scrapy.Spider):
 
         date = response.css('.n--noticia__state p::text').getall()[-1].strip()
         date = datetime.strptime(date, '%d de %B de %Y | %Hh%M')
+        date = date.replace(tzinfo=timezone.utc)
 
         news_obj = {
             'title': response.css('.n--noticia__title::text').get(),
@@ -109,6 +123,7 @@ class ViavarejoSpider(scrapy.Spider):
     def parse_money_invest(self, response, info):
         date = response.css('time::attr(datetime)').get()
         date = datetime.strptime(date, "%Y-%m-%d")
+        date = date.replace(tzinfo=timezone.utc)
         news_obj = {
             'title': response.css('.mvp-post-title::text').get(),
             'content': ''.join([remove_tags(x) for x in response.css('#mvp-content-main p').getall()]),
@@ -123,6 +138,7 @@ class ViavarejoSpider(scrapy.Spider):
     def parse_money_times(self, response, info):
         date = response.css('.single-meta__date::text').get().strip()
         date = datetime.strptime(date, '%d/%m/%Y - %H:%M')
+        date = date.replace(tzinfo=timezone.utc)
         news_obj = {
             'title': response.css('.single__title::text').get().strip(),
             'content': ''.join([remove_tags(x) for x in response.css('.single__text p').getall()]),
