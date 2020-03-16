@@ -35,7 +35,9 @@ jobs:
           name: run tests
           command: |
             . venv/bin/activate
+            cd tests/
             pytest
+
 
       # - store_artifacts:
       #     path: test-reports

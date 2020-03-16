@@ -1,13 +1,14 @@
-from flask_sqlalchemy import SQLAlchemy
 import datetime
+from flask_sqlalchemy import SQLAlchemy
+
 db = SQLAlchemy()
 
 class News(db.Model):
-    title = db.Column(db.String(40), nullable=False)
+    title = db.Column(db.Text, nullable=False)
     content = db.Column(db.Text, nullable=False)
     author = db.Column(db.String(30), nullable=False)
     tick = db.Column(db.String(10), nullable=False)
-    url =  db.Column(db.String(100), nullable=False, primary_key=True)
+    url =  db.Column(db.String(200), nullable=False, primary_key=True)
     site = db.Column(db.String(100), nullable=False, primary_key=True)
     date = db.Column(db.DateTime, nullable=False, primary_key=True)
 

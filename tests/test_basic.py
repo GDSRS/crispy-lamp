@@ -15,12 +15,12 @@ json_object = dict(
 @pytest.fixture(scope='function')
 def client():
     file_level_handle, TEST_DB_PATH = tempfile.mkstemp(suffix='.db',prefix='test_db')
-    app.app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////'+ TEST_DB_PATH
+    app.app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///'+ TEST_DB_PATH
     app.app.config['TESTING'] = True
     
     with app.app.test_client() as client:
         with app.app.app_context():
-            app.initialize_db()
+            app.pop_db()
         yield client
 
     os.close(file_level_handle)
