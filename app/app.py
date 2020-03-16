@@ -2,12 +2,13 @@ from datetime import datetime
 from sqlalchemy.exc import IntegrityError
 from flask import g, Flask, request, Response, make_response # g faz parte do application context
 from .models import db, News, populate_db
+from app.config import DevelopmentConfig
 
 app = Flask(__name__)
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://crispylamp:psql_pwd@localhost/postgresql'
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://crispylamp:psql_pwd@localhost/postgresql'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-db.init_app(app)
+app.config.from_object(DevelopmentConfig())
 
 @app.route('/<string:tick>', methods=['GET'])
 def get_news_by_tick(tick=None):
@@ -50,14 +51,11 @@ def close_connection(exception):
     if db is not None:
         db.close()
 
-def pop_db():
-    with app.app_context():
+def initialize_db(application):
+    db.init_app(application)
+    with application.app_context():
         db.create_all()
-        # if len(News.query.all()) == 0:
-        #     # populate_db()
-        # else:
-        #     print("Não precisou popular")
 
 if __name__ == '__main__':
-    pop_db()
+    initialize_db(app)
     app.run(debug=True)
