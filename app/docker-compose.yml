@@ -1,0 +1,11 @@
+version: '3'
+services:
+  db:
+    image: 'postgres:alpine'
+    network_mode: 'host'
+    volumes:
+      - ./psql_data/:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: 'postgresql'
+      POSTGRES_USER: 'crispylamp'
+      POSTGRES_PASSWORD: 'psql_pwd'

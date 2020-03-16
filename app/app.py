@@ -1,11 +1,11 @@
-import sqlite3
 from datetime import datetime
 from sqlalchemy.exc import IntegrityError
 from flask import g, Flask, request, Response, make_response # g faz parte do application context
 from .models import db, News, populate_db
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://crispylamp:psql_pwd@localhost/postgresql'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
 
@@ -31,6 +31,8 @@ def post_or_get_news():
         else:
             print('request method was', request.method)
             raise Exception
+            make_response({'error': 'request method was %s' % request.method}, 500,
+                          {'Content-Type': 'application/json'})
     except IntegrityError as e:
         return make_response({'error': str(e)}, 500, {'Content-Type': 'application/json'})
 
@@ -50,15 +52,12 @@ def close_connection(exception):
 
 def pop_db():
     with app.app_context():
-        initialize_db()
+        db.create_all()
         # if len(News.query.all()) == 0:
         #     # populate_db()
         # else:
         #     print("Não precisou popular")
 
-def initialize_db():
-    db.create_all()
-
-pop_db()
 if __name__ == '__main__':
-    app.run()
+    pop_db()
+    app.run(debug=True)
