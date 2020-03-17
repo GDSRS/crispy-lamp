@@ -19,8 +19,8 @@ class NewsscraperPipeline(object):
         self.json_data.sort(key=lambda x: x['date'], reverse=True)
         for news in self.json_data:
             news['date'] = news['date'].strftime('%d-%m-%Y %H:%M')
-            r = requests.post('http://localhost:5000/', json=dict(news))
-            # r = requests.post('https://crispy-lamp-api-heroku.herokuapp.com/', json=dict(news))
+            # r = requests.post('http://localhost:5000/', json=dict(news))
+            r = requests.post('https://crispy-lamp-api-heroku.herokuapp.com/', json=dict(news))
             if r.status_code == 201:
                 continue
             else:

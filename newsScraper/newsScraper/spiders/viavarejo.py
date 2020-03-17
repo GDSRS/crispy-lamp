@@ -50,6 +50,21 @@ class ViavarejoSpider(scrapy.Spider):
             elif 'SpaceMoney' == link.get('site'):
                 yield response.follow(link.get('url'), callback=self.parse_spacemoney,
                     cb_kwargs=dict(info=link))
+            elif 'Investing' in link.get('site') and 'analysis' not in link.get('site'): #descarta análises
+                yield response.follow(link.get('url'), callback=self.parse_investing,
+                    cb_kwargs=dict(info=link))
+            elif 'EXAME' in link.get('site'): #descarta análises
+                yield response.follow(link.get('url'), callback=self.parse_exame,
+                    cb_kwargs=dict(info=link))
+            elif 'Suno Notícias' == link.get('site'):
+                yield response.follow(link.get('url'), callback=self.parse_sunoresearch,
+                    cb_kwargs=dict(info=link))
+            elif 'InfoMoney' == link.get('site'):
+                yield response.follow(link.get('url'), callback=self.parse_infomoney,
+                    cb_kwargs=dict(info=link))
+            elif 'Seu Dinheiro' == link.get('site'):
+                yield response.follow(link.get('url'), callback=self.parse_seudinheiro,
+                    cb_kwargs=dict(info=link))
             else:
                yield link
 
@@ -93,7 +108,7 @@ class ViavarejoSpider(scrapy.Spider):
         date = datetime.strptime(date, '%Y-%m-%dT%H:%M:%S.%fZ')
         news_obj = {
             'title': response.css('.content-head__title::text').get(),
-            'content': ''.join([remove_tags(x) for x in response.css('article p').getall()]),
+            'content': remove_tags(''.join(response.css('article p').getall())),
             'date': date, #response.css('time::text').get().strip()
             'author': response.css('.content-publication-data__from::attr(title)').get(),
             'url': info['url'],
@@ -124,9 +139,10 @@ class ViavarejoSpider(scrapy.Spider):
         date = response.css('time::attr(datetime)').get()
         date = datetime.strptime(date, "%Y-%m-%d")
         date = date.replace(tzinfo=timezone.utc)
+
         news_obj = {
             'title': response.css('.mvp-post-title::text').get(),
-            'content': ''.join([remove_tags(x) for x in response.css('#mvp-content-main p').getall()]),
+            'content': remove_tags(''.join(response.css('#mvp-content-main p').getall())),
             'date': date, #response.css('time::text').get().strip()
             'author': 'None',
             'url': info['url'],
@@ -139,9 +155,10 @@ class ViavarejoSpider(scrapy.Spider):
         date = response.css('.single-meta__date::text').get().strip()
         date = datetime.strptime(date, '%d/%m/%Y - %H:%M')
         date = date.replace(tzinfo=timezone.utc)
+        
         news_obj = {
             'title': response.css('.single__title::text').get().strip(),
-            'content': ''.join([remove_tags(x) for x in response.css('.single__text p').getall()]),
+            'content': remove_tags(''.join(response.css('.single__text p').getall())),
             'date': date,
             'author': response.css('.single-meta__author a::text').get().strip(),
             'url': info['url'],
@@ -176,5 +193,84 @@ class ViavarejoSpider(scrapy.Spider):
             'url': info['url'],
             'site': info['site'],
             'tick': 'VVAR3'
+        }
+        yield Noticia(news_obj)
+
+    def parse_investing(self, response, info):
+        date = response.css('.contentSectionDetails span::text').get()
+        date = datetime.strptime(date,'%d.%m.%Y %H:%M')
+        date = date.replace(tzinfo=timezone.utc)
+
+        news_obj = {
+            'title': response.css('.articleHeader::text').get(),
+            'content': remove_tags(''.join(response.css('.articlePage p').getall())),
+            'data': date,
+            'author': 'Investing',
+            'url': info['url'],
+            'site': info['site'],
+            'tick': 'VVAR3'   
+        }
+        yield Noticia(news_obj)
+
+    def parse_exame(self, response, info):
+        date = response.css('.article-date span::text').get().strip()
+        date = datetime.strptime(date,'%d %b %Y, %Hh%M')
+        date = date.replace(tzinfo=timezone.utc)
+
+        news_obj = {
+            'title': response.css('.article-title::text').get(),
+            'content': remove_tags(''.join(response.css('.article-content p').getall())),
+            'data': date,
+            'author': response.css('.author-element::text').get().strip(),
+            'url': info['url'],
+            'site': info['site'],
+            'tick': 'VVAR3'   
+        }
+        yield Noticia(news_obj)
+
+    def parse_sunoresearch(self, response, info):
+        date = response.css('.published::attr(datetime)').get()
+        date = datetime.strptime(date,'%Y-%m-%dT%H:%M:%S%z')
+
+        news_obj = {
+            'title': response.css('.entry-title::text').get(),
+            'content': remove_tags(''.join(response.css('.single-body p').getall())).replace('\n',''),
+            'data': date,
+            'author': response.css('.entry-author__name::text').get(),
+            'url': info['url'],
+            'site': info['site'],
+            'tick': 'VVAR3'   
+        }
+        yield Noticia(news_obj)
+
+    def parse_infomoney(self, response, info):
+        date = response.css('.published::attr(datetime)').get()
+        date = datetime.strptime(date, '%Y-%m-%dT%H:%M:%S%z')
+
+        news_obj = {
+            'title': response.css('.page-title-1::text').get(),
+            'content': remove_tags(''.join(response.css('.article-content p').getall())).strip(),
+            'data': date,
+            'author': response.css('.author-name a::text').get().strip(),
+            'url': info['url'],
+            'site': info['site'],
+            'tick': 'VVAR3'   
+        }
+        yield Noticia(news_obj)
+
+    def parse_seudinheiro(self, response, info):
+        date = response.css('.single__date-time::text').get().strip()
+        date = date +" "+remove_tags(response.css('.single__time').get()).strip().replace('\t','')[:5]
+        date = datetime.strptime(date,'%d de %B de %Y %H:%M')
+        date = date.replace(tzinfo=timezone.utc)
+
+        news_obj = {
+            'title': response.css('.single__title::text').get(),
+            'content': remove_tags(''.join(response.css('.single__body p').getall())).strip(),
+            'data': date,
+            'author': response.css('.author-bio__title::text').get().strip(),
+            'url': info['url'],
+            'site': info['site'],
+            'tick': 'VVAR3'   
         }
         yield Noticia(news_obj)
