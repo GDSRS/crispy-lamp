@@ -1,7 +1,7 @@
-import os
-import tempfile
+import os, tempfile
 import pytest
-from app import app, models
+from app.app import app, initialize_db
+from app.models import db
 
 json_object = dict(
         title='Titulo notícia',
@@ -12,18 +12,23 @@ json_object = dict(
         url='url',
         author='junin autor')
 
+
+
+
 @pytest.fixture(scope='function')
 def client():
     file_level_handle, TEST_DB_PATH = tempfile.mkstemp(suffix='.db',prefix='test_db')
-    app.app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///'+ TEST_DB_PATH
-    app.app.config['TESTING'] = True
-    
-    with app.app.test_client() as client:
-        with app.app.app_context():
-            app.pop_db()
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///'+ TEST_DB_PATH
+
+    db.init_app(app)
+
+    with app.test_client() as client:
+        with app.app_context():
+            db.create_all()
         yield client
 
     os.close(file_level_handle)
+    print('TEST DB PATH', TEST_DB_PATH)
     os.unlink(TEST_DB_PATH)
 
 def test_empty_db(client):

@@ -8,7 +8,6 @@ app = Flask(__name__)
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://crispylamp:psql_pwd@localhost/postgresql'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config.from_object(DevelopmentConfig())
 
 @app.route('/<string:tick>', methods=['GET'])
 def get_news_by_tick(tick=None):
@@ -57,5 +56,6 @@ def initialize_db(application):
         db.create_all()
 
 if __name__ == '__main__':
+    app.config.from_object(DevelopmentConfig())
     initialize_db(app)
     app.run(debug=True)
