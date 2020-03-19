@@ -9,7 +9,7 @@ app = Flask(__name__)
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://crispylamp:psql_pwd@localhost/postgresql'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-@app.route('/<string:tick>', methods=['GET'])
+@app.route('/tick/<string:tick>', methods=['GET'])
 def get_news_by_tick(tick=None):
     if tick is not None:
         news = News.query.filter_by(tick=tick).all()
@@ -17,6 +17,16 @@ def get_news_by_tick(tick=None):
         return make_response({'results': json_result}, 200, {'Content-Type':'application/json'})
 
     return {'ERRO': 'tick deve ser especificado'}
+
+
+@app.route('/site/<string:site>',methods=['GET'])
+def get_news_by_site(site=None):
+    if site is not None:
+        news = News.query.filter_by(site=site).all()
+        json_result = [n.to_json() for n in news]
+        return make_response({'results': json_result}, 200, {'Content-Type':'application/json'})
+
+    return {'ERRO': 'tick deve ser especificado'}        
 
 @app.route('/', methods=['POST', 'GET'])
 def post_or_get_news():

@@ -16,10 +16,10 @@ class NewsscraperItem(scrapy.Item):
 class NoticiaLink(scrapy.Item):
     site = scrapy.Field()
     url = scrapy.Field()
+    tick = scrapy.Field()
 
 class Noticia(NoticiaLink):
     title = scrapy.Field()
     content = scrapy.Field()
-    tick = scrapy.Field()
     date = scrapy.Field()
     author = scrapy.Field()

@@ -43,7 +43,7 @@ def test_post(client):
 
 def test_get_one_news(client):
     client.post('/',json=json_object)
-    response = client.get('/'+json_object['tick'])
+    response = client.get('/tick/'+json_object['tick'])
     assert len(response.json['results']) == 1
     assert response.json['results'][0] == json_object
 
