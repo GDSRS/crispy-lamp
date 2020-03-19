@@ -1,20 +1,13 @@
 # -*- coding: utf-8 -*-
-import scrapy
-import locale
-from w3lib.html import remove_tags
-from urllib.parse import unquote
-from datetime import datetime, timezone
-import logging
-from newsScraper.items import NoticiaLink, Noticia
-
+from newsScraper.items import NoticiaLink
 from .basespider import BasespiderSpider
 
-locale.setlocale(locale.LC_TIME, 'pt_BR.utf8')
 
-class ViavarejoSpider(BasespiderSpider):
-    name = 'viavarejo'
-    # allowed_domains = ['https://www.google.com/search?hl=pt&biw=1366&bih=589&tbs=sbd%3A1&tbm=nws&q=VVAR3']
-    start_urls = ['https://www.google.com/search?q=VVAR3&hl=pt&tbs=sbd:1&tbm=nws']
+
+class NewsSpider(BasespiderSpider):
+    name = 'newsspider'
+    start_urls = ['https://www.google.com/search?q=VVAR3&hl=pt&tbs=sbd:1&tbm=nws',
+                  'https://www.google.com/search?q=MGLU3&hl=pt&tbs=sbd:1&tbm=nws']
 
     def __init__(self, max_num_pgs=3, **kwargs):
         self.MAX_NUM_PAG = max_num_pgs
@@ -22,11 +15,11 @@ class ViavarejoSpider(BasespiderSpider):
         super().__init__(**kwargs)
 
     def parse(self, response):
+        tick = response.url[32:37]
         urls = self.get_search_page_urls(response)
         sites_names = response.css('.UPmit::text').getall()
 
-        links_noticias =  [ NoticiaLink(site=sites_names[i],url=urls[i], tick='VVAR3') for i in range(0,len(urls)) ]
-        # logging.debug('links_noticias', links_noticias)
+        links_noticias =  [ NoticiaLink(site=sites_names[i],url=urls[i], tick=tick) for i in range(0,len(urls)) ]
         for link in links_noticias:
             for handler in self.site_handlers:
                 if handler.get('site_name') in link.get('site'):

@@ -16,8 +16,16 @@ class NewsscraperPipeline(object):
 
     def close_spider(self, spider):
         self.file.close()
-        self.sort_dict_list()
-        for key, values in self.json_data.items():
+        for key in self.json_data:
+            tick_specific = self.json_data[key]
+            self.sort_dict_list(tick_specific)
+
+        for key in self.json_data:
+            tick_specific = self.json_data[key]
+            self.send_data_to_api(tick_specific)
+
+    def send_data_to_api(self, tick_specific):
+        for key, values in tick_specific.items():
             for news in values:
                 news['date'] = news['date'].strftime('%d-%m-%Y %H:%M')
                 r = requests.post('http://localhost:5000/', json=dict(news))
@@ -36,22 +44,26 @@ class NewsscraperPipeline(object):
     def process_item(self, item, spider):
         if item.get('content'):
             try:
-                self.json_data[item['site']].append(item)
+                tick_specific = self.json_data[item['tick']]
+            except KeyError:
+                tick_specific = self.json_data[item['tick']] = {}
+
+            try:
+                tick_specific[item['site']].append(item)
             except KeyError:#quer dizer que a chave ainda n existe
-                self.json_data[item['site']] = [item]
-            # self.json_data.append(item)
+                tick_specific[item['site']] = [item]
             return item
         else:
             self.export_item(item)
             raise DropItem('Missing content in %s' % item)
 
-    def sort_dict_list(self):
+    def sort_dict_list(self, tick_specific):
         try:
             # self.json_data.sort(key=lambda x: x['date'], reverse=True)
-            for key in self.json_data:
-                self.json_data[key].sort(key=lambda x: x['date'], reverse=True)
+            for key in tick_specific:
+                tick_specific[key].sort(key=lambda x: x['date'], reverse=True)
         except TypeError:
-            print(json_data)
+            print(tick_specific)
             sys.exit()
 
     def export_item(self, item):

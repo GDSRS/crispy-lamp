@@ -132,19 +132,20 @@ class BasespiderSpider(scrapy.Spider):
         news_type = ' '.join(response.css('.category .cat-title a::text').getall())
         if "Análise Técnica" in news_type or "Opinião" in news_type:
             yield info
-        date = response.css('time::attr(datetime)').get()
-        date = datetime.strptime(date, '%Y-%m-%dT%H:%M:%S%z')
+        else:
+            date = response.css('time::attr(datetime)').get()
+            date = datetime.strptime(date, '%Y-%m-%dT%H:%M:%S%z')
 
-        news_obj = {
-            'title': response.css('.post-title::text').get().strip(),
-            'content': remove_tags(''.join(response.css('.post-content p').getall())),
-            'date': date,
-            'author': response.css('.posted-by a::text').get().strip(),
-            'url': info['url'],
-            'site': info['site'],
-            'tick': info['tick']
-        }
-        yield Noticia(news_obj)
+            news_obj = {
+                'title': response.css('.post-title::text').get().strip(),
+                'content': remove_tags(''.join(response.css('.post-content p').getall())),
+                'date': date,
+                'author': response.css('.posted-by a::text').get().strip(),
+                'url': info['url'],
+                'site': info['site'],
+                'tick': info['tick']
+            }
+            yield Noticia(news_obj)
 
     def parse_spacemoney(self, response, info):
         date = response.css('.post-published::attr(datetime)').get()
