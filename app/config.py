@@ -6,7 +6,7 @@ class Config(object):
     SQLALCHEMY_DATABASE_URI = 'postgresql://crispylamp:psql_pwd@localhost/postgresql'
 
 class ProductionConfig(Config):
-    SQLALCHEMY_DATABASE_URI = 'postgres://clozuwufxmwuhx:7b53d49d62307c04659ea632443e3fc4a25e60e8ab9f0964c3750e47bc327928@ec2-18-210-51-239.compute-1.amazonaws.com:5432/d4h51f9ilflm6r'
+    SQLALCHEMY_DATABASE_URI = 'postgres://wtdjiseklgfzao:d5e82989a0d5f5fac66bb125ce57b131040743bdfed66b3f002a5df90d2e3017@ec2-54-159-112-44.compute-1.amazonaws.com:5432/d8k83phu8o07c2'
 
 class DevelopmentConfig(Config):
     SQLALCHEMY_DATABASE_URI = 'sqlite:///database.db'
