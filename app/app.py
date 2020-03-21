@@ -26,7 +26,15 @@ def get_news_by_site(site=None):
         json_result = [n.to_json() for n in news]
         return make_response({'results': json_result}, 200, {'Content-Type':'application/json'})
 
-    return {'ERRO': 'tick deve ser especificado'}        
+    return {'ERRO': 'tick deve ser especificado'}
+
+@app.route('/cleanDB', methods=['GET'])
+def cleanDB():
+    db.drop_all()
+    # News.__table__.drop(db.engine)
+    db.create_all()
+    # News.__table__.create(db.engine)
+    return make_response({}, 201, {'Content-Type':'application/json'})
 
 @app.route('/', methods=['POST', 'GET'])
 def post_or_get_news():
@@ -40,7 +48,6 @@ def post_or_get_news():
             return make_response({'results': json_result}, 200, {'Content-Type':'application/json'})
         else:
             print('request method was', request.method)
-            raise Exception
             make_response({'error': 'request method was %s' % request.method}, 500,
                           {'Content-Type': 'application/json'})
     except IntegrityError as e:

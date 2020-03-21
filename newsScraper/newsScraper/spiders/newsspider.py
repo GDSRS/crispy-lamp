@@ -7,7 +7,8 @@ from .basespider import BasespiderSpider
 class NewsSpider(BasespiderSpider):
     name = 'newsspider'
     start_urls = ['https://www.google.com/search?q=VVAR3&hl=pt&tbs=sbd:1&tbm=nws',
-                  'https://www.google.com/search?q=MGLU3&hl=pt&tbs=sbd:1&tbm=nws']
+                  'https://www.google.com/search?q=MGLU3&hl=pt&tbs=sbd:1&tbm=nws',
+                  'https://www.google.com/search?q=CSAN3&hl=pt&tbs=sbd:1&tbm=nws']
 
     def __init__(self, max_num_pgs=3, **kwargs):
         self.MAX_NUM_PAG = max_num_pgs

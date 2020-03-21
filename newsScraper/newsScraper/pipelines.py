@@ -28,12 +28,13 @@ class NewsscraperPipeline(object):
         for key, values in tick_specific.items():
             for news in values:
                 news['date'] = news['date'].strftime('%d-%m-%Y %H:%M')
-                r = requests.post('http://localhost:5000/', json=dict(news))
-                # r = requests.post('https://crispy-lamp-api-heroku.herokuapp.com/', json=dict(news))
+                # r = requests.post('http://localhost:5000/', json=dict(news))
+                r = requests.post('https://crispy-lamp-api-heroku.herokuapp.com/', json=dict(news))
                 if r.status_code == 201:
                     continue
                 elif r.status_code == 500:
-                    print('Notícia %s já foi enviada.' % news['title'])
+                    print('Notícia \" %s \" já foi enviada.' % news['title'])
+                    print("JSON: ",r.json())
                     print(r.json()['error'])
                     # return 'error'
                     break
